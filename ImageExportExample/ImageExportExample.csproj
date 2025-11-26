@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WW.Cad_Net6.0" Version="6.0.2025.7231-trial" />
+    <PackageReference Include="WW.Cad_Net6.0" Version="6.0.2025.11262-trial" />
   </ItemGroup>
 
 </Project>
