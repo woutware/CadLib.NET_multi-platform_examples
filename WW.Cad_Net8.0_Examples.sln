@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication .NET 8.0", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgExportExample .NET 8.0", "SvgExportExample\SvgExportExample .NET 8.0.csproj", "{12F8DB69-DA12-4F53-85CB-BC29910512EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaDesktopApplication", "AvaloniaDesktopApplication\AvaloniaDesktopApplication.csproj", "{2427D485-CF96-4344-86FB-0E5396AEBDCC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaDesktopApplication .NET 8.0", "AvaloniaDesktopApplication\AvaloniaDesktopApplication .NET 8.0.csproj", "{2427D485-CF96-4344-86FB-0E5396AEBDCC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

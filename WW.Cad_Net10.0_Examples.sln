@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 17.0.32126.317
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadExample", "ReadExample\ReadExample.csproj", "{1EFCBA20-7CB2-4695-A6E0-9A0B3ACC8175}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadExample .NET 10.0", "ReadExample\ReadExample .NET 10.0.csproj", "{1EFCBA20-7CB2-4695-A6E0-9A0B3ACC8175}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteExample", "WriteExample\WriteExample.csproj", "{EE5D6DAC-0BC1-4C09-87DA-A8F68FEED54A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteExample .NET 10.0", "WriteExample\WriteExample .NET 10.0.csproj", "{EE5D6DAC-0BC1-4C09-87DA-A8F68FEED54A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfExportExample", "PdfExportExample\PdfExportExample.csproj", "{AEDE7EC1-90AC-4370-81A1-C36541A23BEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfExportExample .NET 10.0", "PdfExportExample\PdfExportExample .NET 10.0.csproj", "{AEDE7EC1-90AC-4370-81A1-C36541A23BEB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageExportExample", "ImageExportExample\ImageExportExample.csproj", "{61D0142C-B3D7-493A-8D3B-1009C12A121B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageExportExample .NET 10.0", "ImageExportExample\ImageExportExample .NET 10.0.csproj", "{61D0142C-B3D7-493A-8D3B-1009C12A121B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication", "WebApplication\WebApplication.csproj", "{5B1CA5BE-6733-487F-A904-705CDBD4660C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication .NET 10.0", "WebApplication\WebApplication .NET 10.0.csproj", "{5B1CA5BE-6733-487F-A904-705CDBD4660C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgExportExample", "SvgExportExample\SvgExportExample.csproj", "{12F8DB69-DA12-4F53-85CB-BC29910512EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgExportExample .NET 10.0", "SvgExportExample\SvgExportExample .NET 10.0.csproj", "{12F8DB69-DA12-4F53-85CB-BC29910512EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaDesktopApplication .NET 10.0", "AvaloniaDesktopApplication\AvaloniaDesktopApplication .NET 10.0.csproj", "{2427D485-CF96-4344-86FB-0E5396AEBDCC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,6 +125,22 @@ Global
 		{12F8DB69-DA12-4F53-85CB-BC29910512EE}.Release|x64.Build.0 = Release|Any CPU
 		{12F8DB69-DA12-4F53-85CB-BC29910512EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{12F8DB69-DA12-4F53-85CB-BC29910512EE}.Release|x86.Build.0 = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|ARM.Build.0 = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|x64.Build.0 = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Debug|x86.Build.0 = Debug|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|ARM.ActiveCfg = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|ARM.Build.0 = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|x64.ActiveCfg = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|x64.Build.0 = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|x86.ActiveCfg = Release|Any CPU
+		{2427D485-CF96-4344-86FB-0E5396AEBDCC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

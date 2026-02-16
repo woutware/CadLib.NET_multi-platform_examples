@@ -1,6 +1,6 @@
 ﻿#region (C) Wout Ware 2026
 //
-// File: SvgExporterExample.cs
+// File: SvgExporterExampleV2.cs
 // Author: Wout de Zeeuw
 // Creation: 1/22/2026
 //
@@ -17,6 +17,7 @@ using System.IO;
 
 using WW.Cad.Base;
 using WW.Cad.Drawing;
+using WW.Cad.Drawing.Wireframe;
 using WW.Cad.IO;
 using WW.Cad.Model;
 using WW.Cad.Model.Objects;
@@ -32,10 +33,13 @@ namespace WW.Cad.Examples {
     /// This class demonstrates how to export an AutoCAD file to SVG (both model space and paper space layouts).
     /// The <see cref="SvgExporter"/> is used in paper mode in this example.
     /// </summary>
-    public class SvgExporterExample {
+    public class SvgExporterExampleV2 {
         // Exports an AutoCAD file to SVG. For each layout a page in the SVG file is created.
         public static void ExportToSvg(string filename, SvgExportOptions options = null) {
-            DxfModel model = CadReader.Read(filename, true);
+            DxfModel model = CadReader.Read(
+                filename, 
+                new ReadConfig { ReadUnknownEntityHandling = ReadUnknownEntityHandling.LoadAsUnknownEntity }
+            );
             model.LoadExternalReferences();
             ExportToSvg(model, options);
         }
@@ -49,6 +53,7 @@ namespace WW.Cad.Examples {
             string dir = Path.GetDirectoryName(model.Filename);
             string filenameNoExt = Path.GetFileNameWithoutExtension(filename);
             string outputFilename = options.GetOutputFilename(dir, filenameNoExt, ".svg");
+
             using (FileStream stream = File.Create(outputFilename)) {
                 SvgExporter svgExporter = new SvgExporter(stream);
 
@@ -60,14 +65,14 @@ namespace WW.Cad.Examples {
         // Optionally specify a modelView (for model space only).
         // Optionally specify a layout.
         private static void AddLayoutToSvgExporter(
-            SvgExporter svgExporter, DxfModel model, DxfView modelView, SvgExportOptions options = null
+            SvgExporter svgExporter, DxfModel model, DxfView modelView, SvgExportOptions options
         ) {
             if (options == null) {
                 options = SvgExportOptions.Default;
             }
             svgExporter.PlotOptions = options;
             Bounds3D bounds;
-            const float defaultMargin = 0.5f;
+            const float defaultMarginInInches = 0.5f;
             float marginInInches = 0f;
             PaperSize paperSize = null;
             bool useModelView = false;
@@ -78,17 +83,23 @@ namespace WW.Cad.Examples {
             } else {
                 layout = model.Header.ShowModelSpace ? model.ModelLayout : model.ActiveLayout;
             }
+
+            DrawableStore drawableStore = new DrawableStore();
+            var drawable = DrawableUtil.CreateDrawables(drawableStore, options.GraphicsConfig, model, layout);
+            DrawableDrawContext drawContext = new DrawableDrawContext(model, layout, options.GraphicsConfig) { IsPlot = true };
+            var drawableInstance = DrawableUtil.CreateDrawableInstance(drawContext, drawable);
+
             if (!layout.PaperSpace) {
                 // Model space.
-                BoundsCalculator boundsCalculator = new BoundsCalculator();
-                boundsCalculator.GetBounds(model);
-                bounds = boundsCalculator.Bounds;
+                bounds = new Bounds3D();
+                drawable.GetWorldBounds(drawContext, bounds, false);
+
                 if (bounds.Initialized) {
                     paperSize = GetPaperSize(bounds, options.ModelSpacePaperKind, options.ModelSpaceOrientation);
                 } else {
                     emptyLayout = true;
                 }
-                marginInInches = defaultMargin;
+                marginInInches = defaultMarginInInches;
                 useModelView = modelView != null;
             } else {
                 // Paper space layout.
@@ -98,8 +109,8 @@ namespace WW.Cad.Examples {
                 if (plotAreaBounds.Initialized) {
                     double customScaleFactor = 1d;
                     if (
-                        (layout.PlotLayoutFlags & PlotLayoutFlags.UseStandardScale) == 0 && 
-                        (layout.PlotArea == PlotArea.LayoutInformation) && 
+                        (layout.PlotLayoutFlags & PlotLayoutFlags.UseStandardScale) == 0 &&
+                        (layout.PlotArea == PlotArea.LayoutInformation) &&
                         (layout.CustomPrintScaleNumerator != 0d && layout.CustomPrintScaleDenominator != 0d)
                     ) {
                         customScaleFactor = layout.CustomPrintScaleNumerator / layout.CustomPrintScaleDenominator;
@@ -123,48 +134,89 @@ namespace WW.Cad.Examples {
 
                     if (paperSize == null) {
                         paperSize = GetPaperSize(bounds, options.PaperSpaceDefaultPaperKind, options.PaperSpaceDefaultOrientation);
-                        marginInInches = defaultMargin;
+                        marginInInches = defaultMarginInInches;
                     }
                 }
             }
 
             if (!emptyLayout) {
-                svgExporter.PaperSize = paperSize;
-
-                // Lengths in inches.
-                float pageWidthInInches = paperSize.Width / 100f;
-                float pageHeightInInches = paperSize.Height / 100f;
-
+                bool paperMode = true;
                 double scaleFactor;
                 Matrix4D to2DTransform;
+                if (paperMode) {
+                    // Paper mode, creates SVG with a specific paper size in cm and coordinates in 100th of cm.
+                    svgExporter.PaperSize = paperSize;
 
-                // SvgExporter is in paper mode, so SVG units are in 100ths of cm.
-                const double inchToHundredthCm = 2.54 * 100;
+                    // Lengths in inches.
+                    float pageWidthInInches = paperSize.Width / 100f;
+                    float pageHeightInInches = paperSize.Height / 100f;
 
-                if (useModelView) {
-                    to2DTransform = modelView.GetMappingTransform(
-                        new Rectangle2D(
-                            marginInInches * inchToHundredthCm,
-                            marginInInches * inchToHundredthCm,
-                            (pageWidthInInches - marginInInches) * inchToHundredthCm,
-                            (pageHeightInInches - marginInInches) * inchToHundredthCm),
-                        true);
-                    scaleFactor = double.NaN; // Not needed for model space.
-                } else {
-                    to2DTransform = DxfUtil.GetScaleTransform(
-                        bounds.Corner1,
-                        bounds.Corner2,
-                        new Point3D(bounds.Center.X, bounds.Corner2.Y, 0d),
-                        new Point3D(new Vector3D(marginInInches, pageHeightInInches - marginInInches, 0d) * inchToHundredthCm),
-                        new Point3D(new Vector3D(pageWidthInInches - marginInInches, marginInInches, 0d) * inchToHundredthCm),
-                        new Point3D(new Vector3D(pageWidthInInches / 2d, marginInInches, 0d) * inchToHundredthCm),
-                        out scaleFactor
+                    // SvgExporter is in paper mode, so SVG units are in 100ths of cm.
+                    const double inchToHundredthCm = 2.54 * 100;
+
+                    if (useModelView) {
+                        to2DTransform = modelView.GetMappingTransform(
+                            new Rectangle2D(
+                                marginInInches * inchToHundredthCm,
+                                marginInInches * inchToHundredthCm,
+                                (pageWidthInInches - marginInInches) * inchToHundredthCm,
+                                (pageHeightInInches - marginInInches) * inchToHundredthCm),
+                            true);
+                        scaleFactor = double.NaN; // Not needed for model space.
+                    } else {
+                        to2DTransform = DxfUtil.GetScaleTransform(
+                            bounds.Corner1,
+                            bounds.Corner2,
+                            new Point3D(bounds.Center.X, bounds.Corner2.Y, 0d),
+                            new Point3D(new Vector3D(marginInInches, pageHeightInInches - marginInInches, 0d) * inchToHundredthCm),
+                            new Point3D(new Vector3D(pageWidthInInches - marginInInches, marginInInches, 0d) * inchToHundredthCm),
+                            new Point3D(new Vector3D(pageWidthInInches / 2d, marginInInches, 0d) * inchToHundredthCm),
+                            out scaleFactor
                         );
-                }
-                if (layout == null || !layout.PaperSpace) {
-                    svgExporter.Draw(model, options.GraphicsConfig, to2DTransform);
+                    }
                 } else {
-                    svgExporter.Draw(model, layout, null, options.GraphicsConfig, to2DTransform, scaleFactor);
+                    // Pixel mode, creates SVG with pixels as units.
+                    Size2D sizeInPixels;
+                    double maxSizeInPixels = 1000;
+
+                    var boundsDelta = bounds.Delta;
+                    if (boundsDelta.X > boundsDelta.Y) {
+                        sizeInPixels = new Size2D(maxSizeInPixels, (maxSizeInPixels * boundsDelta.Y) / boundsDelta.X);
+                    } else {
+                        sizeInPixels = new Size2D((maxSizeInPixels * boundsDelta.X) / boundsDelta.Y, maxSizeInPixels);
+                    }
+
+                    // This sets the SvgExporter in pixel mode.
+                    svgExporter.SizeInPixels = new System.Drawing.Size((int)System.Math.Ceiling(sizeInPixels.X), (int)System.Math.Ceiling(sizeInPixels.Y));
+
+                    const double marginInPixels = 5d;
+
+                    if (useModelView) {
+                        to2DTransform = modelView.GetMappingTransform(
+                            new Rectangle2D(
+                                marginInPixels,
+                                marginInPixels,
+                                sizeInPixels.X - marginInPixels,
+                                sizeInPixels.Y - marginInPixels),
+                            true);
+                        scaleFactor = double.NaN; // Not needed for model space.
+                    } else {
+                        to2DTransform = DxfUtil.GetScaleTransform(
+                            bounds.Corner1,
+                            bounds.Corner2,
+                            new Point3D(bounds.Center.X, bounds.Corner2.Y, 0d),
+                            new Point3D(new Vector3D(marginInPixels, sizeInPixels.Y - marginInPixels, 0d)),
+                            new Point3D(new Vector3D(sizeInPixels.X - marginInPixels, marginInPixels, 0d)),
+                            new Point3D(new Vector3D(sizeInPixels.X / 2d, marginInPixels, 0d)),
+                            out scaleFactor
+                        );
+                    }
+                }
+
+                if (layout == null || !layout.PaperSpace) {
+                    svgExporter.Draw(drawableInstance, model, options.GraphicsConfig, to2DTransform);
+                } else {
+                    svgExporter.Draw(drawableInstance, model, layout, null, options.GraphicsConfig, to2DTransform, scaleFactor);
                 }
             }
         }

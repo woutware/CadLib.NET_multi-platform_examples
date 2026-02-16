@@ -1,6 +1,6 @@
 ﻿#region (C) Wout Ware 2026
 //
-// File: PdfExporterExample.cs
+// File: PdfExporterExampleV2.cs
 // Author: Wout de Zeeuw
 // Creation: 1/22/2026
 //
@@ -17,6 +17,7 @@ using System.IO;
 
 using WW.Cad.Base;
 using WW.Cad.Drawing;
+using WW.Cad.Drawing.Wireframe;
 using WW.Cad.IO;
 using WW.Cad.Model;
 using WW.Cad.Model.Objects;
@@ -29,10 +30,13 @@ using WW.Math.Geometry;
 
 namespace WW.Cad.Examples {
     // This class demonstrates how to export an AutoCAD file to PDF (both model space and paper space layouts).
-    public class PdfExporterExample {
+    public class PdfExporterExampleV2 {
         // Exports an AutoCAD file to PDF. For each layout a page in the PDF file is created.
         public static void ExportToPdf(string filename, PlotOptions options = null) {
-            DxfModel model = CadReader.Read(filename);
+            DxfModel model = CadReader.Read(
+                filename,
+                new ReadConfig { ReadUnknownEntityHandling = ReadUnknownEntityHandling.LoadAsUnknownEntity }
+            );
             model.LoadExternalReferences();
             ExportToPdf(model, options);
         }
@@ -50,15 +54,17 @@ namespace WW.Cad.Examples {
                 PdfExporter pdfExporter = new PdfExporter(stream, options);
                 pdfExporter.EmbedFonts = true;
 
+                DrawableStore drawableStore = new DrawableStore();
+
                 foreach (DxfLayout layout in model.OrderedLayouts) {
-                    AddLayoutToPdfExporter(pdfExporter, options, model, layout);
+                    AddLayoutToPdfExporter(pdfExporter, options, drawableStore, model, layout);
                 }
                 EndDocument(pdfExporter, options);
             }
         }
 
         // Exports the specified layout of an AutoCAD file to PDF.
-        public static void ExportToPdf(DxfModel model, DxfLayout layout, PlotOptions options = null) {
+        public static void ExportToPdf(DxfModel model, DxfLayout layout, DrawableStore drawableStore, PlotOptions options = null) {
             if (options == null) {
                 options = PlotOptions.Default;
             }
@@ -69,7 +75,7 @@ namespace WW.Cad.Examples {
                 PdfExporter pdfExporter = new PdfExporter(stream, options);
                 pdfExporter.EmbedFonts = true;
 
-                AddLayoutToPdfExporter(pdfExporter, options, model, layout);
+                AddLayoutToPdfExporter(pdfExporter, options, drawableStore, model, layout);
 
                 EndDocument(pdfExporter, options);
             }
@@ -79,11 +85,14 @@ namespace WW.Cad.Examples {
         // Optionally specify a layout.
         // Parameter options may be null, in which case PlotOptions.Default is used.
         public static void AddLayoutToPdfExporter(
-            PdfExporter pdfExporter,
+            PdfExporter pdfExporter, 
             PlotOptions options,
-            DxfModel model, 
+            DrawableStore drawableStore,
+            DxfModel model,
             DxfLayout layout
         ) {
+            Console.WriteLine($"Exporting layout {(layout ?? model.ModelLayout).Name}.");
+
             Bounds3D bounds = null;
             const float defaultMargin = 0.5f;
             float margin = 0f;
@@ -98,6 +107,9 @@ namespace WW.Cad.Examples {
                 layout = model.ModelLayout;
             }
 
+            var drawable = DrawableUtil.CreateDrawables(drawableStore, options.GraphicsConfig, model, layout);
+            DrawableDrawContext drawContext = new DrawableDrawContext(model, layout, options.GraphicsConfig) { IsPlot = true };
+            var drawableInstance = DrawableUtil.CreateDrawableInstance(drawContext, drawable);
             if (!layout.PaperSpace) {
                 // Model space.
                 activeVPort = model.VPorts.GetActiveVPort();
@@ -109,9 +121,14 @@ namespace WW.Cad.Examples {
                 if (activeVPort != null) {
                     paperSize = modelSpacePaperSize;
                 } else {
-                    BoundsCalculator boundsCalculator = new BoundsCalculator();
-                    boundsCalculator.GetBounds(model, modelTransform);
-                    bounds = boundsCalculator.Bounds;
+                    bounds = new Bounds3D();
+                    drawContext.SetPreTransform(modelTransform);
+                    drawable.GetWorldBounds(drawContext, bounds, false);
+                    drawContext.RestoreTransforms();
+
+                    //bounds = new Bounds3D();
+                    //BoundsCalculator boundsCalculator = new BoundsCalculator(bounds);
+                    //boundsCalculator.GetBounds(model, modelTransform);
 
                     if (bounds.Initialized) {
                         // If modelSpacePaperSize is not set use paper size information in the model layout if present.
@@ -135,7 +152,7 @@ namespace WW.Cad.Examples {
                             }
                             paperSize = modelSpacePaperSize;
                         } else {
-                                paperSize = modelSpacePaperSize;
+                            paperSize = modelSpacePaperSize;
                             paperSize = EnsureHasPaperSizeAndRotateToMatchBounds(options, bounds, paperSize);
                         }
                     } else {
@@ -222,13 +239,16 @@ namespace WW.Cad.Examples {
                         out scaleFactor
                     ) * modelTransform;
                 }
-                var pageConfiguration = new PdfPageConfiguration(model, options.GraphicsConfig, to2DTransform, paperSize);
+
+                var pageConfiguration = new PdfPageConfiguration(drawableInstance, model, options.GraphicsConfig, to2DTransform, paperSize) {
+                    IsPlot = drawContext.IsPlot
+                };
                 if (!(layout == null || !layout.PaperSpace)) {
                     pageConfiguration.LayoutUnitsToPdfUnits = scaleFactor;
                     pageConfiguration.Layout = layout;
                     pageConfiguration.Viewports = null;
                 }
-                pdfExporter.DrawPage(pageConfiguration, ReportProgress);
+                pdfExporter.DrawPage(pageConfiguration);
             }
         }
 

@@ -14,7 +14,16 @@ namespace SvgExportExample {
             WW.MyWWLicense.Set();
 
             CreateAndWriteCadDrawing();
-            SvgExporterExample.ExportToSvg("Test.dwg");
+            
+            string filename = "Test.dwg";
+            SvgExportOptions options = SvgExportOptions.Default;
+            bool useClassicExporter = true;
+            if (useClassicExporter) {
+                SvgExporterExample.ExportToSvg(filename, options);
+            } else {
+                // The V2 exporter is newer, but the classic exporter is more tried and true.
+                SvgExporterExampleV2.ExportToSvg(filename, options);
+            }
 
             Console.WriteLine($"Written dwg and svg files to directory: {Environment.CurrentDirectory}.");
             Console.WriteLine("Press enter.");

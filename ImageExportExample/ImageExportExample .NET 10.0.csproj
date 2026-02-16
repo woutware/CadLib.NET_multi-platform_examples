@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MyAppKeyPair.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\ReadExample\bin\</OutputPath>
+    <OutputPath>..\..\ImageExportExample\bin\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\ReadExample\bin\</OutputPath>
+    <OutputPath>..\..\ImageExportExample\bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WW.Cad_Net6.0" Version="6.0.2025.11262-trial" />
+    <PackageReference Include="WW.Cad_Net10.0" Version="10.0.2026.2162-trial" />
   </ItemGroup>
 
 </Project>

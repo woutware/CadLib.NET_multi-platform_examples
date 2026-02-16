@@ -1,9 +1,11 @@
 ﻿using System;
 
+using WW.Cad.Drawing;
 using WW.Cad.Examples;
 using WW.Cad.IO;
 using WW.Cad.Model;
 using WW.Cad.Model.Entities;
+using WW.Drawing.Printing;
 using WW.Math;
 
 namespace PdfExportExample {
@@ -14,7 +16,21 @@ namespace PdfExportExample {
             WW.MyWWLicense.Set();
 
             CreateAndWriteCadDrawing();
-            PdfExporterExample.ExportToPdf("Test.dwg");
+            string filename = "Test.dwg";
+
+            PlotOptions options = new PlotOptions {
+                ModelSpacePaperSize = PaperSizes.GetPaperSize(PaperKind.A4)
+            };
+            options.GraphicsConfig.TryDrawingTextAsText = true;
+
+            bool useClassicPdfExporter = true;
+
+            if (useClassicPdfExporter) {
+                WW.Cad.Examples.PdfExporterExample.ExportToPdf(filename);
+            } else {
+                // This V2 PDF exporter is newer, but the classic exporter is more tried and true.
+                WW.Cad.Examples.PdfExporterExampleV2.ExportToPdf(filename);
+            }
 
             Console.WriteLine($"Written dwg and pdf files to directory: {Environment.CurrentDirectory}.");
             Console.WriteLine("Press enter.");
