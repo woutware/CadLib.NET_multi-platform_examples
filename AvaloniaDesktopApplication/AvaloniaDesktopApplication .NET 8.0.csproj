@@ -27,6 +27,6 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="WW.Cad.Avalonia_Net8.0" Version="8.0.2026.9081-trial" />
+    <PackageReference Include="WW.Cad.Avalonia_Net8.0_trial" Version="8.0.2026.9101" />
   </ItemGroup>
 </Project>
