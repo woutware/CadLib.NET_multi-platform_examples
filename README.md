@@ -4,7 +4,9 @@
 
 For the Windows version of CadLib, please visit https://www.woutware.com/cadlib-net, and download the Windows trial version, which contains Win Forms, WPF and Open GL viewer examples.
 
-This repository contains basic read, write and export samples for the trial version of [CadLib.NET (multi-platorm) library](https://www.woutware.com/cadlib-net). 
+The [CadLib.NET documentation with many examples can be found on the Wout Ware web site (needs registration to access)](https://www.woutware.com/doc/8.0/netcore/index.html). If you have any questions, please post your question on the [forum](https://www.woutware.com/forum).
+
+This repository contains basic read, write and export samples for the CadLib.NET trial version. 
 
 For these applications to work you will need a trial license.
 The MyAppKeyPair.snk linked in the projects are not present in the repository, 
